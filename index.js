@@ -265,10 +265,10 @@ function createAccordionFirstMessageSection(messages, expanded) {
  * @param {string} label - Section header text
  * @param {string} content - Section content
  * @param {boolean} expanded - Whether section is open by default
- * @param {boolean} useMarkdown - Whether to render content as markdown
+ * @param {"text" | "md" | "html"} displayFormat - Whether to render content as text, markdown, or HTML. 
  * @returns {HTMLElement} Details element
  */
-function createCollapsibleSection(label, content, expanded, useMarkdown = false) {
+function createCollapsibleSection(label, content, expanded, displayFormat = "text") {
     const details = document.createElement('details');
     details.className = 'cdp-collapsible';
     details.open = expanded;
@@ -278,10 +278,12 @@ function createCollapsibleSection(label, content, expanded, useMarkdown = false)
     summary.textContent = label;
 
     const contentDiv = document.createElement('div');
-    contentDiv.className = 'cdp-collapsible__content' + (useMarkdown ? ' cdp-markdown-content' : '');
+    contentDiv.className = 'cdp-collapsible__content' + (displayFormat ? ' cdp-markdown-content' : '');
 
-    if (useMarkdown) {
+    if (displayFormat === "markdown") {
         contentDiv.innerHTML = renderMarkdown(content);
+    } else if (displayFormat === "html") {
+        contentDiv.innerHTML = content;
     } else {
         const textP = document.createElement('p');
         textP.textContent = content;
@@ -497,7 +499,7 @@ function createCharacterBox(characterData, localAvatar) {
         description: {
             label: 'Description',
             getContent: () => description,
-            useMarkdown: true,
+            displayFormat: "markdown",
         },
         firstMessage: {
             label: 'First Message',
@@ -507,22 +509,22 @@ function createCharacterBox(characterData, localAvatar) {
         scenario: {
             label: 'Scenario',
             getContent: () => scenario,
-            useMarkdown: false,
+            displayFormat: "text",
         },
         personality: {
             label: 'Personality',
             getContent: () => personality,
-            useMarkdown: false,
+            displayFormat: "text",
         },
         creatorNotes: {
             label: 'Creator Notes',
             getContent: () => creatorNotes,
-            useMarkdown: false,
+            displayFormat: "html",
         },
         exampleMessages: {
             label: 'Example Messages',
             getContent: () => exampleMessages,
-            useMarkdown: false,
+            displayFormat: "text",
         },
     };
 
@@ -549,7 +551,7 @@ function createCharacterBox(characterData, localAvatar) {
         } else {
             const content = def.getContent();
             if (content && content.trim()) {
-                const section = createCollapsibleSection(def.label, content.trim(), cfg.expanded, def.useMarkdown);
+                const section = createCollapsibleSection(def.label, content.trim(), cfg.expanded, def.displayFormat);
                 body.appendChild(section);
                 log(`Added tab: ${tabId} (expanded: ${cfg.expanded})`);
             }
